@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  OPERATOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+}
+
+enum ConcertStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bookings  Booking[]
+
+  @@map("users")
+}
+
+model Concert {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  venue       String
+  date        DateTime
+  status      ConcertStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  ticketCategories TicketCategory[]
+  bookings    Booking[]
+
+  @@map("concerts")
+}
+
+model TicketCategory {
+  id          String   @id @default(uuid())
+  concertId   String
+  name        String   // VIP, Standard, etc.
+  price       Decimal  @db.Decimal(10, 2)
+  totalQty    Int
+  reservedQty Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  concert     Concert  @relation(fields: [concertId], references: [id])
+  bookingItems BookingItem[]
+
+  @@map("ticket_categories")
+}
+
+model Booking {
+  id              String        @id @default(uuid())
+  userId          String
+  concertId       String
+  status          BookingStatus @default(PENDING)
+  idempotencyKey  String        @unique
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id])
+  concert         Concert       @relation(fields: [concertId], references: [id])
+  bookingItems    BookingItem[]
+  bookingVoucher  BookingVoucher?
+
+  @@map("bookings")
+}
+
+model BookingItem {
+  id               String         @id @default(uuid())
+  bookingId        String
+  ticketCategoryId String
+  quantity         Int
+  unitPrice        Decimal        @db.Decimal(10, 2)
+  booking          Booking        @relation(fields: [bookingId], references: [id])
+  ticketCategory   TicketCategory @relation(fields: [ticketCategoryId], references: [id])
+
+  @@map("booking_items")
+}
+
+model Voucher {
+  id            String       @id @default(uuid())
+  code          String       @unique
+  discountType  DiscountType
+  discountValue Decimal      @db.Decimal(10, 2)
+  maxUses       Int
+  usedCount     Int          @default(0)
+  expiresAt     DateTime
+  createdAt     DateTime     @default(now())
+  bookingVouchers BookingVoucher[]
+
+  @@map("vouchers")
+}
+
+model BookingVoucher {
+  bookingId String  @unique
+  voucherId String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  voucher   Voucher @relation(fields: [voucherId], references: [id])
+
+  @@id([bookingId, voucherId])
+  @@map("booking_vouchers")
+}
