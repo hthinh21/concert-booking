@@ -1,17 +1,619 @@
 {
   "info": {
-    "name": "GEEKUP Concert Booking",
+    "name": "GEEKUP Concert Booking API",
+    "description": "Concert Ticket Booking Platform - API Testing Collection\n\n## Setup\n1. Run local server: npm run start:dev\n2. Run seed: npx prisma db seed\n3. Login to get token và auto-set vào variables\n\n## Test Accounts\n- Customer: customer@test.com / password123\n- Operator: operator@test.com / password123\n- Admin: admin@test.com / password123",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
-    { "key": "token", "value": "" }
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1", "type": "string" },
+    { "key": "customerToken", "value": "", "type": "string" },
+    { "key": "operatorToken", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "concertId", "value": "", "type": "string" },
+    { "key": "ticketCategoryId", "value": "", "type": "string" },
+    { "key": "bookingId", "value": "", "type": "string" },
+    { "key": "voucherId", "value": "", "type": "string" },
+    { "key": "idempotencyKey", "value": "", "type": "string" }
   ],
   "item": [
-    { "name": "Auth", "item": [] },
-    { "name": "Concerts", "item": [] },
-    { "name": "Bookings", "item": [] },
-    { "name": "Vouchers", "item": [] },
-    { "name": "Admin", "item": [] }
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login - Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.accessToken) {",
+                  "  pm.collectionVariables.set('customerToken', res.data.accessToken);",
+                  "  console.log('Customer token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login - Operator",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.accessToken) {",
+                  "  pm.collectionVariables.set('operatorToken', res.data.accessToken);",
+                  "  console.log('Operator token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"operator@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.accessToken) {",
+                  "  pm.collectionVariables.set('adminToken', res.data.accessToken);",
+                  "  console.log('Admin token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Register - New Customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Concerts (Customer)",
+      "item": [
+        {
+          "name": "List Published Concerts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.data?.[0]?.id) {",
+                  "  pm.collectionVariables.set('concertId', res.data.data[0].id);",
+                  "  console.log('Concert ID saved:', res.data.data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/concerts?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["concerts"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Concert Detail",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/concerts/{{concertId}}"
+          }
+        },
+        {
+          "name": "Get Ticket Categories & Prices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.[0]?.id) {",
+                  "  pm.collectionVariables.set('ticketCategoryId', res.data[0].id);",
+                  "  console.log('Ticket Category ID saved:', res.data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/concerts/{{concertId}}/tickets"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings (Customer)",
+      "item": [
+        {
+          "name": "Create Booking (no voucher)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Auto-generate UUID idempotency key",
+                  "const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {",
+                  "  const r = Math.random() * 16 | 0;",
+                  "  const v = c === 'x' ? r : (r & 0x3 | 0x8);",
+                  "  return v.toString(16);",
+                  "});",
+                  "pm.collectionVariables.set('idempotencyKey', uuid);",
+                  "console.log('Generated idempotency key:', uuid);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.id) {",
+                  "  pm.collectionVariables.set('bookingId', res.data.id);",
+                  "  console.log('Booking ID saved:', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "X-Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"concertId\": \"{{concertId}}\",\n  \"items\": [\n    {\n      \"ticketCategoryId\": \"{{ticketCategoryId}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "Create Booking (with voucher FLASHSALE50)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {",
+                  "  const r = Math.random() * 16 | 0;",
+                  "  const v = c === 'x' ? r : (r & 0x3 | 0x8);",
+                  "  return v.toString(16);",
+                  "});",
+                  "pm.collectionVariables.set('idempotencyKey', uuid);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.id) {",
+                  "  pm.collectionVariables.set('bookingId', res.data.id);",
+                  "  console.log('Booking ID saved:', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "X-Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"concertId\": \"{{concertId}}\",\n  \"items\": [\n    {\n      \"ticketCategoryId\": \"{{ticketCategoryId}}\",\n      \"quantity\": 1\n    }\n  ],\n  \"voucherCode\": \"FLASHSALE50\"\n}"
+            },
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "Retry Same Booking (test idempotency)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "console.log('_fromCache:', res.data?._fromCache);",
+                  "pm.test('Should return cached result', function() {",
+                  "  pm.expect(res.data._fromCache).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "X-Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"concertId\": \"{{concertId}}\",\n  \"items\": [\n    {\n      \"ticketCategoryId\": \"{{ticketCategoryId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/bookings"
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/my?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["bookings", "my"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "PENDING", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking Detail (track status)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": "{{baseUrl}}/bookings/{{bookingId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vouchers (Customer)",
+      "item": [
+        {
+          "name": "Validate Voucher (with preview)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"FLASHSALE50\",\n  \"orderAmount\": 5000000\n}"
+            },
+            "url": "{{baseUrl}}/vouchers/validate"
+          }
+        },
+        {
+          "name": "Validate Voucher (without preview)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"WELCOME100K\"\n}"
+            },
+            "url": "{{baseUrl}}/vouchers/validate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Concerts",
+      "item": [
+        {
+          "name": "List All Concerts (admin view)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/concerts?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "concerts"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Concert (DRAFT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.id) {",
+                  "  pm.collectionVariables.set('newConcertId', res.data.id);",
+                  "  console.log('New Concert ID:', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Thinh Do 1nd World Tour\",\n  \"description\": \"The hottest Software Engineer concert 2026\",\n  \"venue\": \"Landmark 81, HCMC\",\n  \"date\": \"2026-05-12T19:00:00Z\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/concerts"
+          }
+        },
+        {
+          "name": "Add Ticket Category to Concert",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"VIP\",\n  \"price\": 3500000,\n  \"totalQty\": 50\n}"
+            },
+            "url": "{{baseUrl}}/admin/concerts/{{newConcertId}}/tickets"
+          }
+        },
+        {
+          "name": "Publish Concert (DRAFT → PUBLISHED)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "url": "{{baseUrl}}/admin/concerts/{{newConcertId}}/publish"
+          }
+        },
+        {
+          "name": "Validate Ticket Availability",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "url": "{{baseUrl}}/admin/concerts/{{concertId}}/tickets/availability"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Bookings",
+      "item": [
+        {
+          "name": "Monitor All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/bookings?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "bookings"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "PENDING", "disabled": true },
+                { "key": "concertId", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking Detail (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "url": "{{baseUrl}}/admin/bookings/{{bookingId}}"
+          }
+        },
+        {
+          "name": "Confirm Booking (PENDING → CONFIRMED)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/bookings/{{bookingId}}/status"
+          }
+        },
+        {
+          "name": "Cancel Booking (→ CANCELLED)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/bookings/{{bookingId}}/status"
+          }
+        },
+        {
+          "name": "Invalid Transition (test state machine)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Should return 400 for invalid transition', function() {",
+                  "  pm.expect(pm.response.code).to.equal(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/bookings/{{bookingId}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Vouchers",
+      "item": [
+        {
+          "name": "List All Vouchers + Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/vouchers?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "vouchers"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Voucher Campaign",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.id) {",
+                  "  pm.collectionVariables.set('voucherId', res.data.id);",
+                  "  console.log('Voucher ID:', res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"LAUNCH30\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 30,\n  \"maxUses\": 50,\n  \"expiresAt\": \"2026-12-31T00:00:00Z\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/vouchers"
+          }
+        },
+        {
+          "name": "Get Voucher Detail + Usage History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" }
+            ],
+            "url": "{{baseUrl}}/admin/vouchers/{{voucherId}}"
+          }
+        }
+      ]
+    }
   ]
 }
