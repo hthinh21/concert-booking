@@ -35,6 +35,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return result === 1;
   }
 
+  // Tăng counter nguyên tử — an toàn khi nhiều request đồng thời
+  async incr(key: string): Promise<number> {
+    return this.client.incr(key);
+  }
+
+  // Giảm counter nguyên tử
+  async decr(key: string): Promise<number> {
+    return this.client.decr(key);
+  }
+
   // Xóa nhiều key theo pattern, VD: 'concerts:list:*'
   // Dùng SCAN thay vì KEYS để tránh block Redis trên Production
   async delByPattern(pattern: string): Promise<void> {
