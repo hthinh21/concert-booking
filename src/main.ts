@@ -42,7 +42,6 @@ async function bootstrap() {
       .addTag('Concerts')
       .addTag('Bookings')
       .addTag('Vouchers')
-      .addTag('Admin')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
