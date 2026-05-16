@@ -1,0 +1,17 @@
+{
+  "info": {
+    "name": "GEEKUP Concert Booking",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    { "name": "Auth", "item": [] },
+    { "name": "Concerts", "item": [] },
+    { "name": "Bookings", "item": [] },
+    { "name": "Vouchers", "item": [] },
+    { "name": "Admin", "item": [] }
+  ]
+}
