@@ -11,8 +11,18 @@ async function bootstrap() {
   // Global prefix api - EX: api/v1/users
   app.setGlobalPrefix('api/v1');
 
+  // Bật CORS
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true,
+  });
+
   // Validation - EX: khi gửi request nếu data không đúng format thì sẽ báo lỗi ngay
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ 
+    whitelist: true, 
+    transform: true,
+    forbidNonWhitelisted: true 
+  }));
 
   // Exception filter - EX: khi có lỗi thì sẽ trả về lỗi cho client dạng JSON 
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -20,21 +30,24 @@ async function bootstrap() {
   // Response interceptor - EX: khi response sẽ trả về thêm success, timestamp, data
   app.useGlobalInterceptors(new ResponseInterceptor());
 
-  // Swagger - EX: http://localhost:3000/api/docs
-  const config = new DocumentBuilder()
-    .setTitle('GEEKUP Concert Booking API')
-    .setDescription('Concert Ticket Booking Platform - Backend API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .addTag('Auth')
-    .addTag('Concerts')
-    .addTag('Bookings')
-    .addTag('Vouchers')
-    .addTag('Admin')
-    .build();
+  // Ẩn Swagger ở Production
+  if (process.env.NODE_ENV !== 'production') {
+    // Swagger - EX: http://localhost:3000/api/docs
+    const config = new DocumentBuilder()
+      .setTitle('GEEKUP Concert Booking API')
+      .setDescription('Concert Ticket Booking Platform - Backend API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .addTag('Auth')
+      .addTag('Concerts')
+      .addTag('Bookings')
+      .addTag('Vouchers')
+      .addTag('Admin')
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   await app.listen(process.env.PORT || 3000);
   console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
