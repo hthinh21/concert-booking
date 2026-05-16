@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../database/prisma.service';
+import { RedisService } from '../../database/redis.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private redis: RedisService,
   ) { }
 
   async login(dto: LoginDto) {
@@ -30,6 +32,13 @@ export class AuthService {
       email: user.email,
       role: user.role,
     });
+
+    // Cache thông tin user vào Redis (TTL 1 giờ)
+    await this.redis.set(
+      `user:${user.id}`,
+      JSON.stringify({ id: user.id, email: user.email, name: user.name, role: user.role }),
+      3600,
+    );
 
     return {
       accessToken: token,
@@ -73,5 +82,20 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  async logout(token: string): Promise<void> {
+    // Giải mã token để lấy thời gian còn lại
+    const decoded = this.jwtService.decode(token) as { exp: number };
+    const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+
+    if (ttl > 0) {
+      // Đưa token vào blacklist với TTL chính xác bằng thời gian còn lại của token
+      await this.redis.set(`blacklist:${token}`, '1', ttl);
+    }
+  }
+
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    return this.redis.exists(`blacklist:${token}`);
   }
 }
