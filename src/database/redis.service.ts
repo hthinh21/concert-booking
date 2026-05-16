@@ -57,4 +57,27 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       }
     } while (cursor !== '0');
   }
+
+  // ─── Distributed Lock ───────────────────────────────────
+  // SET NX EX — nguyên tử, chống oversell concurrent
+  // ttlMs: thời gian lock tối đa (ms), tự release nếu process crash
+  async acquireLock(resource: string, ttlMs: number): Promise<boolean> {
+    const key = `lock:${resource}`;
+    const result = await this.client.set(key, '1', 'PX', ttlMs, 'NX');
+    return result === 'OK';
+  }
+
+  async releaseLock(resource: string): Promise<void> {
+    await this.client.del(`lock:${resource}`);
+  }
+
+  // ─── Idempotency ────────────────────────────────────────
+  // Lưu kết quả booking để chống duplicate khi client retry
+  async getIdempotency(key: string): Promise<string | null> {
+    return this.client.get(`idempotency:${key}`);
+  }
+
+  async setIdempotency(key: string, value: string, ttlSeconds: number): Promise<void> {
+    await this.client.setex(`idempotency:${key}`, ttlSeconds, value);
+  }
 }
