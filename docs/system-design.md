@@ -190,7 +190,7 @@ User A: POST /bookings (VIP x1)          User B: POST /bookings (VIP x1)
          │                                         │
          ▼                                         ▼
     Redis LOCK "lock:vip-cat-id"              Redis LOCK "lock:vip-cat-id"
-    ✅ Lấy được lock                          ❌ Thất bại (key đã tồn tại)
+     Lấy được lock                           Thất bại (key đã tồn tại)
          │                                         │
          ▼                                         ▼
     Kiểm tra tồn kho: còn 1 vé               Trả về 409 Conflict
@@ -198,7 +198,7 @@ User A: POST /bookings (VIP x1)          User B: POST /bookings (VIP x1)
     Giải phóng lock
          │
          ▼
-    ✅ Đặt vé thành công
+     Đặt vé thành công
 ```
 
 Các quyết định thiết kế quan trọng:
