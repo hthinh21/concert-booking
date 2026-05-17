@@ -20,45 +20,45 @@
 ### Tính năng cho khách hàng
 | Tính năng | Trạng thái | Chi tiết |
 |---|---|---|
-| Duyệt concert | ✅ Hoàn thành | Danh sách concert đang mở bán, có phân trang + tìm kiếm |
-| Xem hạng vé và giá | ✅ Hoàn thành | Bao gồm số vé còn lại (totalQty - reservedQty) |
-| Đặt vé | ✅ Hoàn thành | Luồng giao dịch đầy đủ với bảo vệ đồng thời |
-| Áp dụng mã giảm giá | ✅ Hoàn thành | Hỗ trợ giảm theo PHẦN TRĂM và SỐ TIỀN CỐ ĐỊNH |
-| Theo dõi trạng thái đơn | ✅ Hoàn thành | Xem chi tiết đơn hàng với trạng thái hiện tại |
+| Duyệt concert | Hoàn thành | Danh sách concert đang mở bán, có phân trang + tìm kiếm |
+| Xem hạng vé và giá | Hoàn thành | Bao gồm số vé còn lại (totalQty - reservedQty) |
+| Đặt vé | Hoàn thành | Luồng giao dịch đầy đủ với bảo vệ đồng thời |
+| Áp dụng mã giảm giá | Hoàn thành | Hỗ trợ giảm theo PHẦN TRĂM và SỐ TIỀN CỐ ĐỊNH |
+| Theo dõi trạng thái đơn | Hoàn thành | Xem chi tiết đơn hàng với trạng thái hiện tại |
 
 ### Tính năng cho đội vận hành (Operation Dashboard)
 | Tính năng | Trạng thái | Chi tiết |
 |---|---|---|
-| Tạo concert | ✅ Hoàn thành | Tạo ở trạng thái DRAFT |
-| Xuất bản concert | ✅ Hoàn thành | Chuyển DRAFT → PUBLISHED |
-| Thêm hạng vé | ✅ Hoàn thành | VIP, Standard, Economy, v.v. |
-| Kiểm tra số vé còn lại | ✅ Hoàn thành | Số vé có sẵn theo thời gian thực cho từng hạng |
-| Theo dõi đơn hàng | ✅ Hoàn thành | Lọc theo trạng thái, concertId, có phân trang |
-| Cập nhật trạng thái đơn | ✅ Hoàn thành | State machine chỉ cho phép chuyển trạng thái hợp lệ |
-| Xử lý đơn lỗi | ✅ Hoàn thành | Trạng thái CANCELLED + tự động hoàn tồn kho |
-| Tạo chiến dịch voucher | ✅ Hoàn thành | PERCENTAGE / FIXED_AMOUNT với giới hạn maxUses |
-| Danh sách voucher kèm thống kê | ✅ Hoàn thành | Số lần sử dụng, số lần còn lại |
-| Chi tiết voucher kèm lịch sử | ✅ Hoàn thành | Những đơn hàng nào đã dùng voucher này |
+| Tạo concert | Hoàn thành | Tạo ở trạng thái DRAFT |
+| Xuất bản concert | Hoàn thành | Chuyển DRAFT → PUBLISHED |
+| Thêm hạng vé | Hoàn thành | VIP, Standard, Economy, v.v. |
+| Kiểm tra số vé còn lại | Hoàn thành | Số vé có sẵn theo thời gian thực cho từng hạng |
+| Theo dõi đơn hàng | Hoàn thành | Lọc theo trạng thái, concertId, có phân trang |
+| Cập nhật trạng thái đơn | Hoàn thành | State machine chỉ cho phép chuyển trạng thái hợp lệ |
+| Xử lý đơn lỗi | Hoàn thành | Trạng thái CANCELLED + tự động hoàn tồn kho |
+| Tạo chiến dịch voucher | Hoàn thành | PERCENTAGE / FIXED_AMOUNT với giới hạn maxUses |
+| Danh sách voucher kèm thống kê | Hoàn thành | Số lần sử dụng, số lần còn lại |
+| Chi tiết voucher kèm lịch sử | Hoàn thành | Những đơn hàng nào đã dùng voucher này |
 
 ### Xử lý đồng thời & Độ tin cậy
 | Tính năng | Trạng thái | Chi tiết |
 |---|---|---|
-| Chống bán quá số lượng | ✅ Hoàn thành | Khóa phân tán Redis theo từng hạng vé |
-| Chống đặt vé trùng lặp | ✅ Hoàn thành | Khóa idempotency (UUID do client tạo trong header) |
-| Chống lạm dụng voucher | ✅ Hoàn thành | Giới hạn theo user + bộ đếm toàn cục + dự phòng DB |
-| Tự động hết hạn đơn chờ | ✅ Hoàn thành | Cron job mỗi phút, ngưỡng 10 phút |
-| Quản lý tồn kho nguyên tử | ✅ Hoàn thành | DB transaction cho tất cả thao tác ghi |
-| Xử lý lỗi toàn diện | ✅ Hoàn thành | Global exception filter + response chuẩn hóa |
+| Chống bán quá số lượng | Hoàn thành | Khóa phân tán Redis theo từng hạng vé |
+| Chống đặt vé trùng lặp | Hoàn thành | Khóa idempotency (UUID do client tạo trong header) |
+| Chống lạm dụng voucher | Hoàn thành | Giới hạn theo user + bộ đếm toàn cục + dự phòng DB |
+| Tự động hết hạn đơn chờ | Hoàn thành | Cron job mỗi phút, ngưỡng 10 phút |
+| Quản lý tồn kho nguyên tử | Hoàn thành | DB transaction cho tất cả thao tác ghi |
+| Xử lý lỗi toàn diện | Hoàn thành | Global exception filter + response chuẩn hóa |
 
 ### Hạ tầng
 | Tính năng | Trạng thái | Chi tiết |
 |---|---|---|
-| Docker Compose | ✅ Hoàn thành | Khởi chạy 1 lệnh: `docker compose up --build` |
-| Database migration | ✅ Hoàn thành | Prisma migrate (tự chạy trong Docker) |
-| Dữ liệu mẫu | ✅ Hoàn thành | Users, concerts, vouchers |
-| Tài liệu API | ✅ Hoàn thành | Swagger tự sinh từ decorators |
-| Postman collection | ✅ Hoàn thành | Cấu hình sẵn với biến tự động lưu |
-| Unit test | ✅ Hoàn thành | AuthService với mock dependencies |
+| Docker Compose | Hoàn thành | Khởi chạy 1 lệnh: `docker compose up --build` |
+| Database migration | Hoàn thành | Prisma migrate (tự chạy trong Docker) |
+| Dữ liệu mẫu | Hoàn thành | Users, concerts, vouchers |
+| Tài liệu API | Hoàn thành | Swagger tự sinh từ decorators |
+| Postman collection | Hoàn thành | Cấu hình sẵn với biến tự động lưu |
+| Unit test | Hoàn thành | AuthService với mock dependencies |
 
 ## Chưa triển khai (Giới hạn)
 
